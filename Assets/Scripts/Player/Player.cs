@@ -7,11 +7,10 @@ public class Player : MonoBehaviourPunCallbacks
     private Rigidbody rb;
     private Animator animator;
 
-    [Header("Shooting")]
     public float fireRange = 30f;
     public GameObject bulletPrefab;
     public Transform firePoint;
-
+    public Transform hatPosition;
 
     void Start()
     {
@@ -27,7 +26,6 @@ public class Player : MonoBehaviourPunCallbacks
         {
             Fire();
         }
-
     }
 
     void Movement()
@@ -60,5 +58,4 @@ public class Player : MonoBehaviourPunCallbacks
     {
         GameObject bullet = PhotonNetwork.Instantiate(bulletPrefab.name, firePoint.position, firePoint.rotation);
     }
-
 }

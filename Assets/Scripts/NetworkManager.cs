@@ -1,42 +1,41 @@
 using UnityEngine;
 using Photon.Pun;
+using UnityEngine.UI;
+using UnityEngine.Assertions.Must;
+using TMPro;
 
-public class NetworkManager : MonoBehaviour
+public class NetworkManager : MonoBehaviourPunCallbacks
 {
     // instance
     public static NetworkManager instance;
+    public TMP_InputField userName;
 
-    void Awake()
+    void Update()
     {
-        // if there is any other instance then don't make this instance but if not make this instace
-        if (instance != null && instance != this)
-            gameObject.SetActive(false);
+        Debug.Log("Network State : " + PhotonNetwork.NetworkClientState);
+    }
 
+    public void OnLoginClick()
+    {
+        string name = userName.text;
+        if (!string.IsNullOrEmpty(name))
+        {
+            PhotonNetwork.LocalPlayer.NickName = name;
+            PhotonNetwork.ConnectUsingSettings();
+        }
         else
         {
-            instance = this;
-            DontDestroyOnLoad(this.gameObject);
+            Debug.Log("Empty...");
         }
     }
 
-    void Start()
+    public override void OnConnected()
     {
-        PhotonNetwork.ConnectUsingSettings();
+        Debug.Log("Connected..");
     }
-
-    public void CreateRoom(string roomName)
+    public override void OnConnectedToMaster()
     {
-        PhotonNetwork.CreateRoom(roomName);
-    }
-
-    public void JoinRoom(string roomName)
-    {
-        PhotonNetwork.JoinRoom(roomName);
-    }
-
-    public void ChangeScene(string sceneName)
-    {
-        PhotonNetwork.LoadLevel(sceneName);
+        Debug.Log(PhotonNetwork.LocalPlayer.NickName + " is connected to photon");
     }
 
 }

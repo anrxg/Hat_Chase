@@ -1,12 +1,18 @@
 using UnityEngine;
+using Photon.Pun;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviourPunCallbacks
 {
-    private float speed = 3f;
-    private float jumpForce;
-    [SerializeField] private Transform cameraTransform;
-    Rigidbody rb;
-    Animator animator;
+    public float speed = 1f;
+    private Rigidbody rb;
+    private Animator animator;
+
+    [Header("Shooting")]
+    public float fireRange = 30f;
+    public GameObject bulletPrefab;
+    public Transform firePoint;
+
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -17,25 +23,42 @@ public class Player : MonoBehaviour
     {
         Movement();
         Animations();
+        if (Input.GetMouseButtonDown(0))
+        {
+            Fire();
+        }
+
     }
 
     void Movement()
     {
         float inputX = Input.GetAxis("Horizontal");
-        float inputY = Input.GetAxis("Vertical");
-        Vector3 move = new Vector3(inputX, 0, inputY);
+        float inputZ = Input.GetAxis("Vertical");
+
+        Vector3 move = new Vector3(inputX, 0f, inputZ);
+
+        if (move.magnitude > 1f)
+            move = move.normalized;
 
         if (move != Vector3.zero)
         {
             Quaternion toRotation = Quaternion.LookRotation(move, Vector3.up);
-            transform.rotation = Quaternion.Slerp(transform.rotation, toRotation, 15f * Time.deltaTime);
+            transform.rotation = Quaternion.Slerp(transform.rotation, toRotation, 10f * Time.deltaTime);
         }
-        transform.Translate(move * speed * Time.deltaTime, Space.World);
+
+        Vector3 targetPosition = rb.position + move * speed * Time.fixedDeltaTime;
+        rb.MovePosition(targetPosition);
     }
 
     void Animations()
     {
-        bool isMoving = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D);
+        bool isMoving = Input.GetAxis("Horizontal") != 0f || Input.GetAxis("Vertical") != 0f;
         animator.SetBool("isRunning", isMoving);
     }
+
+    void Fire()
+    {
+        GameObject bullet = PhotonNetwork.Instantiate(bulletPrefab.name, firePoint.position, firePoint.rotation);
+    }
+
 }
